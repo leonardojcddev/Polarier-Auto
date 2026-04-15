@@ -27,7 +27,14 @@ const Login = () => {
       }
       navigate("/lobby");
     } catch (err: any) {
-      toast.error(err.message || "Error al iniciar sesión");
+      const msg: string = err.message || "";
+      if (msg.toLowerCase().includes("invalid login credentials") || msg.toLowerCase().includes("invalid credentials")) {
+        toast.error("Correo o contraseña incorrectos.");
+      } else if (msg.toLowerCase().includes("email not confirmed")) {
+        toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
+      } else {
+        toast.error(msg || "Error al iniciar sesión");
+      }
     } finally {
       setLoading(false);
     }

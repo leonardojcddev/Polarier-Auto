@@ -15,6 +15,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isRecovery: boolean;
+  pendingVerification: boolean;
   login: (email: string, password: string) => Promise<{ user: User | null }>;
   register: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRecovery, setIsRecovery] = useState(() => hasRecoveryParams());
+  const [pendingVerification, setPendingVerification] = useState(false);
 
   const loadProfile = async () => {
     const p = await getProfile();
@@ -94,6 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (email: string, password: string) => {
     await signUpWithEmail(email, password);
+    setPendingVerification(true);
   };
 
   const loginWithGoogle = async () => {
@@ -105,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, isRecovery, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, isRecovery, pendingVerification, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
