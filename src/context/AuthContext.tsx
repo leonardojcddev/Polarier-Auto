@@ -25,8 +25,7 @@ const hasRecoveryParams = () => {
   const { search, hash } = window.location;
   return (
     search.includes('type=recovery') ||
-    hash.includes('type=recovery') ||
-    (hash.includes('access_token=') && hash.includes('refresh_token='))
+    hash.includes('type=recovery')
   );
 };
 
