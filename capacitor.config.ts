@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Polarier Auto',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
+    url: 'https://polarier-auto-production.up.railway.app',
+    cleartext: true
   },
   android: {
     allowMixedContent: false,
