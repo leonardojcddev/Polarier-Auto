@@ -40,6 +40,62 @@
     --sidebar-fg: 0 0% 100%;
     --sidebar-muted: 231 40% 35%;
     --sidebar-active: 39 76% 60%;
+
+    --chat-bg-mobile: url('/backgrounds/light-mobile.png');
+    --chat-bg-desktop: url('/backgrounds/light-desktop.png');
+  }
+
+  .dark {
+    --background: 228 20% 10%;
+    --foreground: 225 14% 92%;
+
+    --card: 228 18% 14%;
+    --card-foreground: 225 14% 92%;
+
+    --popover: 228 18% 14%;
+    --popover-foreground: 225 14% 92%;
+
+    --primary: 231 60% 65%;
+    --primary-foreground: 228 30% 12%;
+
+    --secondary: 39 76% 60%;
+    --secondary-foreground: 228 30% 12%;
+
+    --muted: 228 15% 20%;
+    --muted-foreground: 228 10% 65%;
+
+    --accent: 39 76% 60%;
+    --accent-foreground: 228 30% 12%;
+
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 228 15% 22%;
+    --input: 228 15% 22%;
+    --ring: 231 60% 65%;
+
+    --sidebar-bg: 228 25% 8%;
+    --sidebar-fg: 0 0% 100%;
+    --sidebar-muted: 228 20% 16%;
+    --sidebar-active: 39 76% 60%;
+
+    --chat-bg-mobile: url('/backgrounds/dark-mobile.png');
+    --chat-bg-desktop: url('/backgrounds/dark-desktop.png');
+  }
+}
+
+@layer utilities {
+  .chat-bg {
+    background-image: var(--chat-bg-mobile);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  @media (min-width: 768px) {
+    .chat-bg {
+      background-image: var(--chat-bg-desktop);
+    }
   }
 }
 

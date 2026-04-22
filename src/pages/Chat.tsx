@@ -256,7 +256,7 @@ const Chat = () => {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 chat-bg">
         {messages.length === 0 && !currentChatId && (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">Envía un mensaje para comenzar una conversación</p>

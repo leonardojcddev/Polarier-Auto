@@ -1,7 +1,8 @@
-import { MessageSquare, FolderOpen, Clock, Settings, LogOut } from "lucide-react";
+import { MessageSquare, FolderOpen, Clock, Settings, LogOut, Sun, Moon } from "lucide-react";
 import polarierLogo from "@/assets/polarier-logo.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { getChats, Chat } from "@/services/chat";
 
@@ -21,6 +22,7 @@ const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [chats, setChats] = useState<Chat[]>([]);
 
   const refreshChats = () => getChats().then(setChats).catch(() => {});
@@ -126,13 +128,23 @@ const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
               <span className="text-sidebar-fg/60 text-xs truncate">{userEmail}</span>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-sidebar-fg/70 text-sm hover:text-sidebar-fg transition-colors"
-          >
-            <LogOut size={16} />
-            <span>Cerrar sesión</span>
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-sidebar-fg/70 text-sm hover:text-sidebar-fg transition-colors"
+            >
+              <LogOut size={16} />
+              <span>Cerrar sesión</span>
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-sidebar-fg/70 hover:text-sidebar-fg hover:bg-sidebar-muted/50 transition-colors"
+              title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+              aria-label="Cambiar tema"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+          </div>
         </div>
       </aside>
     </>

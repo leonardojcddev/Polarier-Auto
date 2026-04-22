@@ -5,7 +5,7 @@ export const signUpWithEmail = async (email: string, password: string) => {
     email,
     password,
     options: {
-      emailRedirectTo: 'https://polarier-auto-production.up.railway.app/verify-email'
+      emailRedirectTo: 'polarier://verify-email'
     }
   });
   if (error) throw error;
@@ -21,7 +21,7 @@ export const signInWithEmail = async (email: string, password: string) => {
 export const signInWithGoogle = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin },
+    options: { redirectTo: 'polarier://verify-email' },
   });
   if (error) throw error;
   return data;

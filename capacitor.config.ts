@@ -8,9 +8,11 @@ const config: CapacitorConfig = {
     url: 'https://polarier-auto-production.up.railway.app',
     cleartext: true
   },
-  android: {
-    allowMixedContent: false,
-  },
+  plugins: {
+    App: {
+      urlScheme: 'polarier'
+    }
+  }
 };
 
 export default config;
