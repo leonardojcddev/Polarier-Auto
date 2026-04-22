@@ -1,35 +1,27 @@
 import { supabase } from '@/lib/supabaseClient';
-import { Capacitor } from '@capacitor/core';
 
-const getAuthRedirectUrl = () => {
-  if (Capacitor.isNativePlatform()) {
-    return 'polarier://auth/callback';
-  }
-  return `${window.location.origin}/auth/callback`;
-};
-
-/**
- * Envía un magic link al correo. Sirve tanto para registro como para login:
- * si el usuario no existe, Supabase lo crea; si existe, simplemente lo autentica.
- */
-export const sendMagicLink = async (email: string, fullName?: string) => {
-  const { error } = await supabase.auth.signInWithOtp({
+export const signUpWithEmail = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signUp({
     email,
+    password,
     options: {
-      emailRedirectTo: getAuthRedirectUrl(),
-      shouldCreateUser: true,
-      data: fullName ? { full_name: fullName } : undefined,
-    },
+      emailRedirectTo: 'https://polarier-auto-production.up.railway.app/verify-email'
+    }
   });
   if (error) throw error;
+  return data;
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
 };
 
 export const signInWithGoogle = async () => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: getAuthRedirectUrl(),
-    },
+    options: { redirectTo: window.location.origin },
   });
   if (error) throw error;
   return data;
@@ -45,8 +37,8 @@ export const updatePassword = async (password: string) => {
   if (error) throw error;
 };
 
-export const signInWithEmail = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+export const getUser = async () => {
+  const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw error;
-  return data;
+  return user;
 };
