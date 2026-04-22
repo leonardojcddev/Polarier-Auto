@@ -20,18 +20,16 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const result = await login(email, password);
-      if (result.user && !result.user.email_confirmed_at) {
-        toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
-        return;
-      }
+      await login(email, password);
       navigate("/lobby");
     } catch (err: any) {
       const msg: string = err.message || "";
-      if (msg.toLowerCase().includes("invalid login credentials") || msg.toLowerCase().includes("invalid credentials")) {
+      const lower = msg.toLowerCase();
+      if (lower.includes("invalid login credentials") || lower.includes("invalid credentials")) {
         toast.error("Correo o contraseña incorrectos.");
-      } else if (msg.toLowerCase().includes("email not confirmed")) {
-        toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
+      } else if (lower.includes("email not confirmed")) {
+        toast.error("Debes verificar tu correo antes de iniciar sesión.");
+        navigate("/verify-email", { state: { email } });
       } else {
         toast.error(msg || "Error al iniciar sesión");
       }

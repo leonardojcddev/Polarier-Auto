@@ -31,10 +31,20 @@ const Register = () => {
     }
     setLoading(true);
     try {
-      await register(email, password);
-      navigate("/verify-email");
+      const { needsEmailVerification } = await register(email, password);
+      if (needsEmailVerification) {
+        navigate("/verify-email", { state: { email } });
+      } else {
+        // Supabase está configurado sin confirmación — entramos directo
+        navigate("/lobby");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Error al crear cuenta");
+      const msg: string = err.message || "";
+      if (msg.toLowerCase().includes("already registered") || msg.toLowerCase().includes("user already")) {
+        toast.error("Este correo ya está registrado. Inicia sesión.");
+      } else {
+        toast.error(msg || "Error al crear cuenta");
+      }
     } finally {
       setLoading(false);
     }

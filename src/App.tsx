@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import AuthCallback from "./pages/AuthCallback";
 import Lobby from "./pages/Lobby";
 import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
@@ -22,19 +23,18 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, pendingVerification } = useAuth();
+  const { user, loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center h-screen bg-background"><span className="text-muted-foreground">Cargando...</span></div>;
-  if (!user || pendingVerification) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isRecovery, pendingVerification } = useAuth();
+  const { user, loading, isRecovery } = useAuth();
   const location = useLocation();
   if (loading) return <div className="flex items-center justify-center h-screen bg-background"><span className="text-muted-foreground">Cargando...</span></div>;
   if (isRecovery && location.pathname !== "/reset-password") return <Navigate to="/reset-password" replace />;
-  if (pendingVerification && location.pathname !== "/verify-email") return <Navigate to="/verify-email" replace />;
-  if (user && !pendingVerification) return <Navigate to="/lobby" replace />;
+  if (user) return <Navigate to="/lobby" replace />;
   return <>{children}</>;
 };
 
@@ -53,6 +53,7 @@ const App = () => (
               <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/lobby" element={<ProtectedRoute><Lobby /></ProtectedRoute>} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/chat" element={<Chat />} />

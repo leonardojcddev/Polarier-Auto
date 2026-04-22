@@ -15,19 +15,15 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isRecovery: boolean;
-  pendingVerification: boolean;
   login: (email: string, password: string) => Promise<{ user: User | null }>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<{ needsEmailVerification: boolean }>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const hasRecoveryParams = () => {
   const { search, hash } = window.location;
-  return (
-    search.includes('type=recovery') ||
-    hash.includes('type=recovery')
-  );
+  return search.includes('type=recovery') || hash.includes('type=recovery');
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,52 +34,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRecovery, setIsRecovery] = useState(() => hasRecoveryParams());
-  const [pendingVerification, setPendingVerification] = useState(false);
 
   const loadProfile = async () => {
-    const p = await getProfile();
-    setProfile(p);
+    try {
+      const p = await getProfile();
+      setProfile(p);
+    } catch {
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       const recoveryDetected = event === 'PASSWORD_RECOVERY' || hasRecoveryParams();
 
       if (recoveryDetected) {
         setIsRecovery(true);
-      } else if (!session) {
+      } else if (!newSession) {
         setIsRecovery(false);
       }
 
-      setSession(session);
-      setUser(session?.user ?? null);
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
       setLoading(false);
 
-      if (session?.user && !recoveryDetected) {
-        setTimeout(() => loadProfile(), 0);
-      } else if (!session?.user) {
+      if (newSession?.user && !recoveryDetected) {
+        setTimeout(loadProfile, 0);
+      } else if (!newSession?.user) {
         setProfile(null);
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       const recoveryDetected = hasRecoveryParams();
 
-      if (recoveryDetected) {
-        setIsRecovery(true);
-      } else if (!session) {
-        setIsRecovery(false);
-      }
+      if (recoveryDetected) setIsRecovery(true);
+      else if (!initialSession) setIsRecovery(false);
 
-      setSession(session);
-      setUser(session?.user ?? null);
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
       setLoading(false);
 
-      if (session?.user && !recoveryDetected) {
-        loadProfile();
-      } else if (!session?.user) {
-        setProfile(null);
-      }
+      if (initialSession?.user && !recoveryDetected) loadProfile();
+      else if (!initialSession?.user) setProfile(null);
     });
 
     return () => subscription.unsubscribe();
@@ -95,8 +88,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (email: string, password: string) => {
-    await signUpWithEmail(email, password);
-    setPendingVerification(true);
+    const result = await signUpWithEmail(email, password);
+    // Si Supabase tiene "confirm email" activado, devuelve user sin session.
+    // Si está desactivado, devuelve session inmediatamente.
+    const needsEmailVerification = !result.session;
+    return { needsEmailVerification };
   };
 
   const loginWithGoogle = async () => {
@@ -108,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, isRecovery, pendingVerification, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, isRecovery, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
