@@ -1,23 +1,31 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import AppSidebar from "./AppSidebar";
 
+export interface LayoutContext {
+  openSidebar: () => void;
+}
+
 const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const isChat = location.pathname.startsWith("/chat");
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
       <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Mobile header */}
-        <div className="lg:hidden flex items-center h-12 px-4 border-b border-border bg-card">
-          <button onClick={() => setSidebarOpen(true)}>
-            <Menu size={22} />
-          </button>
-        </div>
+        {/* Mobile header — oculto en /chat porque Chat.tsx tiene su propio header con botón */}
+        {!isChat && (
+          <div className="lg:hidden flex items-center h-12 px-4 border-b border-border bg-card">
+            <button onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+              <Menu size={22} />
+            </button>
+          </div>
+        )}
         <main className="flex-1 flex flex-col overflow-y-auto">
-          <Outlet />
+          <Outlet context={{ openSidebar: () => setSidebarOpen(true) } satisfies LayoutContext} />
         </main>
       </div>
     </div>

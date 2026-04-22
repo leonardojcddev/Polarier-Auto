@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { useParams, useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import { Plus, Menu } from "lucide-react";
 import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
 import { PendingFile } from "@/components/FilePreviewCard";
@@ -9,11 +9,13 @@ import { uploadDocument } from "@/services/storage";
 import botAvatar from "@/assets/bot-avatar.svg";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import type { LayoutContext } from "@/components/AppLayout";
 
 const Chat = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { openSidebar } = useOutletContext<LayoutContext>();
   const { user, profile } = useAuth();
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
@@ -244,19 +246,29 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
-        <h1 className="text-lg font-semibold text-foreground truncate max-w-[60%]">{chatTitle}</h1>
+    <div className="flex flex-col h-full chat-bg">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-background/70 backdrop-blur-md border-b border-border/40">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <button
+            onClick={openSidebar}
+            className="lg:hidden p-1.5 rounded-lg text-foreground hover:bg-muted transition-colors"
+            aria-label="Abrir menú"
+          >
+            <Menu size={22} />
+          </button>
+          <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">{chatTitle}</h1>
+        </div>
         <button
           onClick={handleNewChat}
-          className="flex items-center gap-1.5 px-4 py-2 bg-secondary text-secondary-foreground text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity"
+          className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-secondary text-secondary-foreground text-xs sm:text-sm font-semibold rounded-lg hover:opacity-90 transition-opacity shrink-0"
         >
           <Plus size={16} />
-          Nueva conversación
+          <span className="hidden sm:inline">Nueva conversación</span>
+          <span className="sm:hidden">Nueva</span>
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 chat-bg">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
         {messages.length === 0 && !currentChatId && (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">Envía un mensaje para comenzar una conversación</p>

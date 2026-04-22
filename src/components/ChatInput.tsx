@@ -36,7 +36,7 @@ const ChatInput = ({ value, onChange, onSend, onFileSelect, uploading, disabled,
   };
 
   return (
-    <div className="border-t border-border bg-card px-4 py-3">
+    <div className="border-t border-border/40 bg-background/70 backdrop-blur-md px-4 py-3">
       <div className="max-w-3xl mx-auto">
         {pendingFile && (
           <div className="mb-2">
@@ -69,7 +69,7 @@ const ChatInput = ({ value, onChange, onSend, onFileSelect, uploading, disabled,
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !disabled && onSend()}
             disabled={disabled}
-            className="flex-1 bg-background border border-border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            className="flex-1 bg-card border border-border rounded-full px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
           />
           <button
             onClick={onSend}
