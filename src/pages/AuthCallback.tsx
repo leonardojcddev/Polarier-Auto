@@ -1,22 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import AuthCard from "@/components/AuthCard";
+import { useAuth } from "@/context/AuthContext";
 
-/**
- * Callback web tras magic link. Supabase JS procesa la URL
- * automáticamente (detectSessionInUrl: true) usando flujo PKCE.
- */
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const { setNeedsPasswordSetup } = useAuth();
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // PKCE flow: Supabase intercambia el código por sesión
-    // Puede tomar un momento, esperamos un poco
     const timer = setTimeout(() => {
       supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          navigate("/lobby", { replace: true });
+        if (session?.user) {
+          const isGoogleUser = session.user.app_metadata?.provider === 'google';
+          if (isGoogleUser) {
+            setNeedsPasswordSetup(true);
+            navigate("/setup-password", { replace: true });
+          } else {
+            navigate("/lobby", { replace: true });
+          }
         } else {
           navigate("/login", { replace: true });
         }
@@ -24,12 +27,13 @@ const AuthCallback = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, setNeedsPasswordSetup]);
 
   return (
     <AuthCard>
       <div className="text-center py-8">
         <p className="text-sm text-muted-foreground">Completando autenticación...</p>
+        {error && <p className="text-sm text-destructive mt-2">{error}</p>}
       </div>
     </AuthCard>
   );

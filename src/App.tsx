@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
+import SetupPassword from "./pages/SetupPassword";
 import Lobby from "./pages/Lobby";
 import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/setup-password" element={<ProtectedRoute><SetupPassword /></ProtectedRoute>} />
               <Route path="/lobby" element={<ProtectedRoute><Lobby /></ProtectedRoute>} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/chat" element={<Chat />} />
