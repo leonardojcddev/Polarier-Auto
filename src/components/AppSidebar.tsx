@@ -60,7 +60,7 @@ const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
       )}
 
       <aside
-        className={`fixed lg:static top-0 left-0 z-50 h-screen lg:h-full w-[260px] bg-sidebar-bg flex flex-col transition-transform duration-200 ${
+        className={`fixed lg:static top-0 left-0 z-50 h-screen-dvh lg:h-full w-[260px] bg-sidebar-bg flex flex-col transition-transform duration-200 safe-top safe-bottom ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >

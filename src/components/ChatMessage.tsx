@@ -12,7 +12,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
   if (sender === "bot") {
     return (
       <div className="flex gap-3 max-w-2xl">
-        <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
+        <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center overflow-hidden">
           <img src={botAvatar} alt="Bot" className="w-5 h-5" />
         </div>
         <div>

@@ -13,12 +13,12 @@ const AppLayout = () => {
   const isChat = location.pathname.startsWith("/chat");
 
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden">
+    <div className="flex h-screen-dvh w-full bg-background overflow-hidden">
       <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen-dvh overflow-hidden">
         {/* Mobile header — oculto en /chat porque Chat.tsx tiene su propio header con botón */}
         {!isChat && (
-          <div className="lg:hidden flex items-center h-12 px-4 border-b border-border bg-card">
+          <div className="lg:hidden flex items-center h-12 px-4 border-b border-border bg-card safe-top">
             <button onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
               <Menu size={22} />
             </button>

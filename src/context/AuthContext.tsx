@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-import { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut as authSignOut } from '@/services/auth';
+import { sendMagicLink, signOut as authSignOut } from '@/services/auth';
 import { getProfile } from '@/services/chat';
 
 interface Profile {
@@ -14,17 +14,9 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  isRecovery: boolean;
-  login: (email: string, password: string) => Promise<{ user: User | null }>;
-  register: (email: string, password: string) => Promise<{ needsEmailVerification: boolean }>;
-  loginWithGoogle: () => Promise<void>;
+  sendLink: (email: string, fullName?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
-
-const hasRecoveryParams = () => {
-  const { search, hash } = window.location;
-  return search.includes('type=recovery') || hash.includes('type=recovery');
-};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -33,7 +25,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isRecovery, setIsRecovery] = useState(() => hasRecoveryParams());
 
   const loadProfile = async () => {
     try {
@@ -45,58 +36,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      const recoveryDetected = event === 'PASSWORD_RECOVERY' || hasRecoveryParams();
-
-      if (recoveryDetected) {
-        setIsRecovery(true);
-      } else if (!newSession) {
-        setIsRecovery(false);
-      }
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setLoading(false);
 
-      if (newSession?.user && !recoveryDetected) {
+      if (newSession?.user) {
         setTimeout(loadProfile, 0);
-      } else if (!newSession?.user) {
+      } else {
         setProfile(null);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      const recoveryDetected = hasRecoveryParams();
-
-      if (recoveryDetected) setIsRecovery(true);
-      else if (!initialSession) setIsRecovery(false);
-
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
       setLoading(false);
 
-      if (initialSession?.user && !recoveryDetected) loadProfile();
-      else if (!initialSession?.user) setProfile(null);
+      if (initialSession?.user) loadProfile();
+      else setProfile(null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const result = await signInWithEmail(email, password);
-    return { user: result.user ?? null };
-  };
-
-  const register = async (email: string, password: string) => {
-    const result = await signUpWithEmail(email, password);
-    // Si Supabase tiene "confirm email" activado, devuelve user sin session.
-    // Si está desactivado, devuelve session inmediatamente.
-    const needsEmailVerification = !result.session;
-    return { needsEmailVerification };
-  };
-
-  const loginWithGoogle = async () => {
-    await signInWithGoogle();
+  const sendLink = async (email: string, fullName?: string) => {
+    await sendMagicLink(email, fullName);
   };
 
   const logout = async () => {
@@ -104,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, isRecovery, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, sendLink, logout }}>
       {children}
     </AuthContext.Provider>
   );

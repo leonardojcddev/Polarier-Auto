@@ -247,7 +247,7 @@ const Chat = () => {
 
   return (
     <div className="flex flex-col h-full chat-bg">
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-background/70 backdrop-blur-md border-b border-border/40">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-background/70 backdrop-blur-md border-b border-border/40 safe-top">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <button
             onClick={openSidebar}
@@ -286,7 +286,7 @@ const Chat = () => {
         ))}
         {isTyping && (
           <div className="flex gap-3 max-w-2xl">
-            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center overflow-hidden">
               <img src={botAvatar} alt="Bot" className="w-5 h-5" />
             </div>
             <div className="bg-muted rounded-xl rounded-tl-sm px-4 py-3 text-sm text-muted-foreground flex items-center gap-1">

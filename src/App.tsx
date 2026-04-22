@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,10 +7,6 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
 import AuthCallback from "./pages/AuthCallback";
 import Lobby from "./pages/Lobby";
 import Chat from "./pages/Chat";
@@ -30,10 +26,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isRecovery } = useAuth();
-  const location = useLocation();
+  const { user, loading } = useAuth();
   if (loading) return <div className="flex items-center justify-center h-screen bg-background"><span className="text-muted-foreground">Cargando...</span></div>;
-  if (isRecovery && location.pathname !== "/reset-password") return <Navigate to="/reset-password" replace />;
   if (user) return <Navigate to="/lobby" replace />;
   return <>{children}</>;
 };
@@ -49,10 +43,6 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-              <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/lobby" element={<ProtectedRoute><Lobby /></ProtectedRoute>} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
@@ -62,6 +52,10 @@ const App = () => (
                 <Route path="/history" element={<History />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </Route>
+              <Route path="/register" element={<Navigate to="/login" replace />} />
+              <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
+              <Route path="/reset-password" element={<Navigate to="/login" replace />} />
+              <Route path="/verify-email" element={<Navigate to="/login" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

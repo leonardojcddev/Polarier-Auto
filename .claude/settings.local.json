@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls /c/Trabajo/Polarier-Auto/.env*)"
+      "Bash(ls /c/Trabajo/Polarier-Auto/.env*)",
+      "Bash(bun dev *)",
+      "Bash(npm run *)"
     ]
   }
 }

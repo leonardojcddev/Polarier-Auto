@@ -21,24 +21,17 @@ CapacitorApp.addListener('appUrlOpen', async (event) => {
     const accessToken = hashParams.get('access_token');
     const refreshToken = hashParams.get('refresh_token');
     const code = queryParams.get('code');
-    const type = hashParams.get('type') || queryParams.get('type');
 
-    // Flujo implícito (email signup confirmation / password recovery)
+    // Magic link (flujo implícito): access_token + refresh_token en el hash
     if (accessToken && refreshToken) {
       await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
     }
-    // Flujo PKCE (OAuth Google)
+    // OAuth / PKCE: ?code=...
     else if (code) {
       await supabase.auth.exchangeCodeForSession(code);
     }
 
-    // Decidir destino
-    if (type === 'recovery') {
-      window.location.href = '/reset-password';
-    } else {
-      // signup confirmado, OAuth completado, o magic link → lobby
-      window.location.href = '/lobby';
-    }
+    window.location.href = '/lobby';
   } catch (err) {
     console.error('Error procesando deep link', err);
     window.location.href = '/login';

@@ -36,7 +36,7 @@ const ChatInput = ({ value, onChange, onSend, onFileSelect, uploading, disabled,
   };
 
   return (
-    <div className="border-t border-border/40 bg-background/70 backdrop-blur-md px-4 py-3">
+    <div className="border-t border-border/40 bg-background/70 backdrop-blur-md px-4 py-3 safe-bottom">
       <div className="max-w-3xl mx-auto">
         {pendingFile && (
           <div className="mb-2">

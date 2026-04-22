@@ -1,50 +1,54 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
 import AuthCard from "@/components/AuthCard";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { login, loginWithGoogle } = useAuth();
-  const [showPass, setShowPass] = useState(false);
+  const { sendLink } = useAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !password) {
-      toast.error("Por favor completa todos los campos");
+    if (!email) {
+      toast.error("Introduce tu correo electrónico");
       return;
     }
     setLoading(true);
     try {
-      await login(email, password);
-      navigate("/lobby");
+      await sendLink(email);
+      setSent(true);
+      toast.success("Enlace enviado. Revisa tu correo.");
     } catch (err: any) {
       const msg: string = err.message || "";
-      const lower = msg.toLowerCase();
-      if (lower.includes("invalid login credentials") || lower.includes("invalid credentials")) {
-        toast.error("Correo o contraseña incorrectos.");
-      } else if (lower.includes("email not confirmed")) {
-        toast.error("Debes verificar tu correo antes de iniciar sesión.");
-        navigate("/verify-email", { state: { email } });
+      if (msg.toLowerCase().includes("rate limit")) {
+        toast.error("Has solicitado demasiados enlaces. Espera unos minutos.");
       } else {
-        toast.error(msg || "Error al iniciar sesión");
+        toast.error(msg || "No se pudo enviar el enlace");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogle = async () => {
-    try {
-      await loginWithGoogle();
-    } catch (err: any) {
-      toast.error(err.message || "Error con Google");
-    }
-  };
+  if (sent) {
+    return (
+      <AuthCard>
+        <div className="text-center space-y-4 py-4">
+          <h2 className="text-lg font-semibold text-foreground">Revisa tu correo</h2>
+          <p className="text-sm text-muted-foreground">
+            Te hemos enviado un enlace a <span className="font-medium text-foreground">{email}</span>. Ábrelo para iniciar sesión.
+          </p>
+          <button
+            onClick={() => { setSent(false); setEmail(""); }}
+            className="text-sm text-secondary hover:underline"
+          >
+            Usar otro correo
+          </button>
+        </div>
+      </AuthCard>
+    );
+  }
 
   return (
     <AuthCard>
@@ -60,32 +64,9 @@ const Login = () => {
             placeholder="tu@correo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             className="w-full border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-ring bg-card"
           />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-foreground mb-1 block">Contraseña</label>
-          <div className="relative">
-            <input
-              type={showPass ? "text" : "password"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              className="w-full border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-ring bg-card pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            >
-              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-        </div>
-
-        <div className="text-right">
-          <button onClick={() => navigate("/forgot-password")} className="text-sm text-secondary hover:underline">¿Olvidaste tu contraseña?</button>
         </div>
 
         <button
@@ -93,28 +74,11 @@ const Login = () => {
           disabled={loading}
           className="w-full py-2.5 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm disabled:opacity-50"
         >
-          {loading ? "Iniciando..." : "Iniciar sesión"}
+          {loading ? "Enviando..." : "Enviar enlace de acceso"}
         </button>
 
-        <div className="flex items-center gap-3 my-2">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground">o</span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        <button
-          onClick={handleGoogle}
-          className="w-full py-2.5 border border-border rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors bg-card"
-        >
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-          Continuar con Google
-        </button>
-
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          ¿No tienes cuenta?{" "}
-          <button onClick={() => navigate("/register")} className="text-foreground font-medium hover:underline">
-            Regístrate
-          </button>
+        <p className="text-center text-xs text-muted-foreground mt-4">
+          Al continuar aceptas los términos y la política de privacidad.
         </p>
       </div>
     </AuthCard>
