@@ -24,6 +24,17 @@ export const sendMagicLink = async (email: string, fullName?: string) => {
   if (error) throw error;
 };
 
+export const signInWithGoogle = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: getAuthRedirectUrl(),
+    },
+  });
+  if (error) throw error;
+  return data;
+};
+
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -32,4 +43,10 @@ export const signOut = async () => {
 export const updatePassword = async (password: string) => {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) throw error;
+};
+
+export const signInWithEmail = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
 };

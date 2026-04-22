@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-import { sendMagicLink, signOut as authSignOut } from '@/services/auth';
+import { sendMagicLink, signInWithGoogle, signOut as authSignOut, signInWithEmail } from '@/services/auth';
 import { getProfile } from '@/services/chat';
 
 interface Profile {
@@ -15,6 +15,8 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   sendLink: (email: string, fullName?: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -64,12 +66,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await sendMagicLink(email, fullName);
   };
 
+  const loginWithGoogle = async () => {
+    await signInWithGoogle();
+  };
+
+  const loginWithEmail = async (email: string, password: string) => {
+    await signInWithEmail(email, password);
+  };
+
   const logout = async () => {
     await authSignOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, sendLink, logout }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, sendLink, loginWithGoogle, loginWithEmail, logout }}>
       {children}
     </AuthContext.Provider>
   );
