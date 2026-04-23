@@ -173,10 +173,10 @@ const Lobby = () => {
             <button
               onClick={openFilePicker}
               disabled={sending}
-              className="pl-5 pr-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              className="pl-3 sm:pl-5 pr-1 shrink-0 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
               title="Adjuntar archivo"
             >
-              <Paperclip size={22} />
+              <Paperclip size={20} />
             </button>
             <input
               ref={inputRef}
@@ -185,15 +185,15 @@ const Lobby = () => {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={sending}
-              placeholder="Escribe tu pregunta o sube un documento..."
-              className="flex-1 bg-transparent py-5 px-3 text-base outline-none text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+              placeholder="Escribe tu pregunta..."
+              className="flex-1 min-w-0 bg-transparent py-3.5 sm:py-5 px-2 sm:px-3 text-sm sm:text-base outline-none text-foreground placeholder:text-muted-foreground disabled:opacity-50"
             />
             <button
               onClick={handleSend}
               disabled={!query.trim() || sending}
-              className="mr-2 sm:mr-3 w-12 h-12 shrink-0 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
+              className="mr-2 sm:mr-3 w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
             >
-              <Send size={20} className="text-primary" />
+              <Send size={18} className="text-primary" />
             </button>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-2">
