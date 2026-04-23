@@ -4,8 +4,9 @@ import { supabase } from '@/lib/supabaseClient';
 import {
   signInWithEmail,
   signUpWithEmail,
-  signInWithGoogle as authSignInWithGoogle,
   signOut as authSignOut,
+  requestPasswordReset as authRequestPasswordReset,
+  updatePassword as authUpdatePassword,
 } from '@/services/auth';
 import { getProfile } from '@/services/chat';
 
@@ -21,12 +22,12 @@ interface AuthContextType {
   loading: boolean;
   authProcessing: boolean;
   setAuthProcessing: (v: boolean) => void;
-  needsPasswordSetup: boolean;
-  setNeedsPasswordSetup: (value: boolean) => void;
+  isRecovery: boolean;
+  setIsRecovery: (v: boolean) => void;
   login: (email: string, password: string) => Promise<{ user: User | null }>;
-  signUpEmail: (email: string) => Promise<void>;
-  signInGoogle: () => Promise<void>;
-  signUpGoogle: () => Promise<void>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ session: Session | null }>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -37,12 +38,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
-  // Activo mientras /auth/callback decide destino. Bloquea guards para evitar
-  // redirecciones prematuras (p. ej. a /lobby) antes de aplicar reglas de negocio.
   const [authProcessing, setAuthProcessing] = useState(
     typeof window !== 'undefined' && window.location.pathname === '/auth/callback'
   );
+  const [isRecovery, setIsRecovery] = useState(false);
 
   const loadProfile = async () => {
     try {
@@ -54,7 +53,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'PASSWORD_RECOVERY') setIsRecovery(true);
+
       setSession(newSession);
       setUser(newSession?.user ?? null);
       setLoading(false);
@@ -78,20 +79,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { user: result.user ?? null };
   };
 
-  const signUpEmail = async (email: string) => {
-    await signUpWithEmail(email);
+  const signUp = async (email: string, password: string, fullName?: string) => {
+    const result = await signUpWithEmail(email, password, fullName);
+    return { session: result.session ?? null };
   };
 
-  const signInGoogle = async () => {
-    await authSignInWithGoogle('signin');
+  const requestPasswordReset = async (email: string) => {
+    await authRequestPasswordReset(email);
   };
 
-  const signUpGoogle = async () => {
-    await authSignInWithGoogle('signup');
+  const updatePassword = async (password: string) => {
+    await authUpdatePassword(password);
   };
 
   const logout = async () => {
-    setNeedsPasswordSetup(false);
+    setIsRecovery(false);
     await authSignOut();
   };
 
@@ -104,12 +106,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading,
         authProcessing,
         setAuthProcessing,
-        needsPasswordSetup,
-        setNeedsPasswordSetup,
+        isRecovery,
+        setIsRecovery,
         login,
-        signUpEmail,
-        signInGoogle,
-        signUpGoogle,
+        signUp,
+        requestPasswordReset,
+        updatePassword,
         logout,
       }}
     >

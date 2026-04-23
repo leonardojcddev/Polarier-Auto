@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, signInGoogle } = useAuth();
+  const { login } = useAuth();
   const [showPass, setShowPass] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,31 +20,19 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const result = await login(email, password);
-      if (result.user && !result.user.email_confirmed_at) {
-        toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
-        return;
-      }
+      await login(email, password);
       navigate("/lobby");
     } catch (err: any) {
-      const msg: string = err.message || "";
-      if (msg.toLowerCase().includes("invalid login credentials") || msg.toLowerCase().includes("invalid credentials")) {
+      const msg: string = (err.message || "").toLowerCase();
+      if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
         toast.error("Correo o contraseña incorrectos. Si no tienes cuenta, regístrate primero.");
-      } else if (msg.toLowerCase().includes("email not confirmed")) {
+      } else if (msg.includes("email not confirmed")) {
         toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
       } else {
-        toast.error(msg || "Error al iniciar sesión");
+        toast.error(err.message || "Error al iniciar sesión");
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogle = async () => {
-    try {
-      await signInGoogle();
-    } catch (err: any) {
-      toast.error(err.message || "Error con Google");
     }
   };
 
@@ -87,7 +75,12 @@ const Login = () => {
         </div>
 
         <div className="text-right">
-          <button onClick={() => navigate("/forgot-password")} className="text-sm text-secondary hover:underline">¿Olvidaste tu contraseña?</button>
+          <button
+            onClick={() => navigate("/forgot-password")}
+            className="text-sm text-secondary hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
         </div>
 
         <button
@@ -96,20 +89,6 @@ const Login = () => {
           className="w-full py-2.5 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:opacity-90 transition-opacity text-sm disabled:opacity-50"
         >
           {loading ? "Iniciando..." : "Iniciar sesión"}
-        </button>
-
-        <div className="flex items-center gap-3 my-2">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground">o</span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        <button
-          onClick={handleGoogle}
-          className="w-full py-2.5 border border-border rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors bg-card"
-        >
-          <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-          Continuar con Google
         </button>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
