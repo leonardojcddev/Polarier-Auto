@@ -213,6 +213,7 @@ const Chat = () => {
 
       setIsTyping(true);
       const n8nResponse = await sendToN8n(activeChatId, user?.id || '', userMessage, 'user', {
+        id: doc.id,
         file_name: doc.file_name,
         file_path: doc.file_path,
         mime_type: doc.mime_type,

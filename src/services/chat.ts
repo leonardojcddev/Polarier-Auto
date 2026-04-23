@@ -173,7 +173,7 @@ export const sendToN8n = async (
   userId: string,
   message: string,
   role: string,
-  fileInfo?: { file_name: string; file_path: string; mime_type: string; size_bytes: number },
+  fileInfo?: { id: string; file_name: string; file_path: string; mime_type: string; size_bytes: number },
   userName?: string,
   userEmail?: string
 ): Promise<string | null> => {
