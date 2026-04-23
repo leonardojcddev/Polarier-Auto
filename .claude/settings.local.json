@@ -3,7 +3,9 @@
     "allow": [
       "Bash(ls /c/Trabajo/Polarier-Auto/.env*)",
       "Bash(bun dev *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(wait)",
+      "Bash(npx capacitor-assets *)"
     ]
   }
 }

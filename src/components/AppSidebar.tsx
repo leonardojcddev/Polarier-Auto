@@ -66,9 +66,6 @@ const AppSidebar = ({ isOpen, onClose }: AppSidebarProps) => {
       >
         <button onClick={() => navigate("/lobby")} className="px-5 pt-5 pb-6 flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img src={polarierLogo} alt="Polarier" className="h-10" />
-          <span className="bg-primary text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded-md">
-            Beta
-          </span>
         </button>
 
         <nav className="flex-1 flex flex-col gap-0.5 px-2 overflow-y-auto">

@@ -247,7 +247,7 @@ const Chat = () => {
 
   return (
     <div className="flex flex-col h-full chat-bg">
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-background/70 backdrop-blur-md border-b border-border/40 safe-top">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-3 bg-background/70 backdrop-blur-md border-b border-border/40 safe-top">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <button
             onClick={openSidebar}

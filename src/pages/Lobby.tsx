@@ -158,9 +158,6 @@ const Lobby = () => {
         {/* ── HERO ── */}
         <section className="flex flex-col items-center text-center gap-2">
           <img src={polarierLogo} alt="Polarier" className="h-16" />
-          <span className="bg-primary text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded-md">
-            Beta
-          </span>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mt-6">
             ¿Qué quieres hacer hoy?
@@ -194,9 +191,9 @@ const Lobby = () => {
             <button
               onClick={handleSend}
               disabled={!query.trim() || sending}
-              className="mr-3 w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
+              className="mr-2 sm:mr-3 w-12 h-12 shrink-0 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
             >
-              <Send size={18} className="text-primary" />
+              <Send size={20} className="text-primary" />
             </button>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-2">

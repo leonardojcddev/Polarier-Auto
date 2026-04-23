@@ -18,8 +18,12 @@ const AppLayout = () => {
       <div className="flex-1 flex flex-col h-screen-dvh overflow-hidden">
         {/* Mobile header — oculto en /chat porque Chat.tsx tiene su propio header con botón */}
         {!isChat && (
-          <div className="lg:hidden flex items-center h-12 px-4 border-b border-border bg-card safe-top">
-            <button onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+          <div className="lg:hidden flex items-center px-4 py-3 border-b border-border bg-card safe-top">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Abrir menú"
+              className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+            >
               <Menu size={22} />
             </button>
           </div>
