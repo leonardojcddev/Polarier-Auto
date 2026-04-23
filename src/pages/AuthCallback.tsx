@@ -31,9 +31,33 @@ const AuthCallback = () => {
     ran.current = true;
     setAuthProcessing(true);
 
+    // Capturamos la URL ANTES de que Supabase limpie el hash (detectSessionInUrl lo borra).
+    const originalHref = window.location.href;
+    const originalHash = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : window.location.hash;
+    const hashParams = new URLSearchParams(originalHash);
+    const queryParams = new URLSearchParams(window.location.search);
+    const urlType = hashParams.get("type") || queryParams.get("type");
+    const urlError = hashParams.get("error") || queryParams.get("error");
+    const urlErrorDescription =
+      hashParams.get("error_description") || queryParams.get("error_description");
+
+    console.log("[AuthCallback] URL:", originalHref, "type:", urlType);
+
     const run = async () => {
+      // Error devuelto por Supabase en la URL (enlace expirado, ya usado, etc.)
+      if (urlError) {
+        setError(decodeURIComponent(urlErrorDescription || urlError).replace(/\+/g, " "));
+        setTimeout(() => {
+          setAuthProcessing(false);
+          navigate("/login", { replace: true });
+        }, 2500);
+        return;
+      }
+
       // Dar tiempo a detectSessionInUrl para procesar la URL.
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 600));
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
@@ -49,9 +73,9 @@ const AuthCallback = () => {
       const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
       const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
       const isBrandNew =
-        createdAt > 0 && lastSignIn > 0 && Math.abs(lastSignIn - createdAt) < 10000;
+        createdAt > 0 && lastSignIn > 0 && Math.abs(lastSignIn - createdAt) < 15000;
 
-      // 1) Login Google de cuenta que se acaba de crear → rechazar.
+      // 1) Google login de cuenta recién creada → rechazar.
       if (intent === "signin" && provider === "google" && isBrandNew) {
         await supabase.auth.signOut();
         setError("Esta cuenta no existe todavía. Debes registrarte primero.");
@@ -62,18 +86,21 @@ const AuthCallback = () => {
         return;
       }
 
-      // 2) Alta por email (magic link): provider=email + recién creado → setup password.
-      //    Detección independiente del intent porque el link puede abrirse en otro
-      //    navegador donde el intent no existe.
-      if (provider === "email" && isBrandNew) {
+      // 2) Signup por email → /setup-password.
+      //    Señal fuerte: la URL original trae type=signup (emitido por Supabase).
+      //    Señal secundaria: provider=email + usuario brand-new.
+      const isSignupConfirmation =
+        urlType === "signup" ||
+        urlType === "magiclink" ||
+        (provider === "email" && isBrandNew);
+
+      if (isSignupConfirmation && provider === "email") {
         setNeedsPasswordSetup(true);
         setAuthProcessing(false);
         navigate("/setup-password", { replace: true });
         return;
       }
 
-      // 3) Resto: signup Google nuevo, signin Google existente, magic link de usuario
-      //    existente (no debería ocurrir en nuestro flujo), etc. → lobby.
       setAuthProcessing(false);
       navigate("/lobby", { replace: true });
     };
