@@ -20,16 +20,22 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center h-screen bg-background">
+    <span className="text-muted-foreground">Cargando...</span>
+  </div>
+);
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen bg-background"><span className="text-muted-foreground">Cargando...</span></div>;
+  const { user, loading, authProcessing } = useAuth();
+  if (loading || authProcessing) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="flex items-center justify-center h-screen bg-background"><span className="text-muted-foreground">Cargando...</span></div>;
+  const { user, loading, authProcessing } = useAuth();
+  if (loading || authProcessing) return <LoadingScreen />;
   if (user) return <Navigate to="/lobby" replace />;
   return <>{children}</>;
 };

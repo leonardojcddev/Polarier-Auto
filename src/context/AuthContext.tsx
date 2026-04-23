@@ -19,6 +19,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  authProcessing: boolean;
+  setAuthProcessing: (v: boolean) => void;
   needsPasswordSetup: boolean;
   setNeedsPasswordSetup: (value: boolean) => void;
   login: (email: string, password: string) => Promise<{ user: User | null }>;
@@ -36,6 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
+  // Activo mientras /auth/callback decide destino. Bloquea guards para evitar
+  // redirecciones prematuras (p. ej. a /lobby) antes de aplicar reglas de negocio.
+  const [authProcessing, setAuthProcessing] = useState(
+    typeof window !== 'undefined' && window.location.pathname === '/auth/callback'
+  );
 
   const loadProfile = async () => {
     try {
@@ -95,6 +102,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         profile,
         loading,
+        authProcessing,
+        setAuthProcessing,
         needsPasswordSetup,
         setNeedsPasswordSetup,
         login,

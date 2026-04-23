@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import AuthCard from "@/components/AuthCard";
@@ -8,26 +8,36 @@ import { consumeAuthIntent } from "@/services/auth";
 /**
  * Callback de autenticación (magic link signup + OAuth).
  *
- * Regla de negocio: login NO debe crear cuentas nuevas.
- * Supabase no permite bloquear la creación en OAuth, así que aquí detectamos
- * si la sesión recién creada es un usuario que acaba de aparecer y la intención
- * original era "signin" → cerramos sesión y mandamos a registro.
+ * Reglas:
+ * - Signup-email (magic link de alta) → siempre lleva a /setup-password. Se detecta
+ *   por provider=email + usuario recién creado. No depende de localStorage "intent"
+ *   porque el link se puede abrir en otro navegador/dispositivo.
+ * - Signin con Google de cuenta que se acaba de crear (porque Supabase no bloquea
+ *   OAuth signup) → signOut y redirigir a /register. Aquí sí usamos intent porque
+ *   el flujo OAuth vuelve al mismo navegador que lo inició.
+ * - Resto → /lobby.
  *
- * Heurística "usuario recién creado": created_at y last_sign_in_at casi iguales
- * (diferencia < 5s). Es la forma fiable sin backend propio.
+ * authProcessing bloquea los guards de ruta mientras decidimos destino, para evitar
+ * que ProtectedRoute muestre /lobby un instante antes.
  */
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { setNeedsPasswordSetup } = useAuth();
+  const { setNeedsPasswordSetup, setAuthProcessing } = useAuth();
   const [error, setError] = useState("");
+  const ran = useRef(false);
 
   useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+    setAuthProcessing(true);
+
     const run = async () => {
-      // Pequeño delay para que detectSessionInUrl de Supabase termine de procesar.
-      await new Promise((r) => setTimeout(r, 400));
+      // Dar tiempo a detectSessionInUrl para procesar la URL.
+      await new Promise((r) => setTimeout(r, 500));
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
+        setAuthProcessing(false);
         navigate("/login", { replace: true });
         return;
       }
@@ -38,34 +48,38 @@ const AuthCallback = () => {
 
       const createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
       const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).getTime() : 0;
-      const isBrandNew = createdAt > 0 && lastSignIn > 0 && Math.abs(lastSignIn - createdAt) < 5000;
+      const isBrandNew =
+        createdAt > 0 && lastSignIn > 0 && Math.abs(lastSignIn - createdAt) < 10000;
 
-      // Caso 1: intentó login (signin) pero la cuenta se acaba de crear → rechazar.
-      if (intent === "signin" && isBrandNew) {
+      // 1) Login Google de cuenta que se acaba de crear → rechazar.
+      if (intent === "signin" && provider === "google" && isBrandNew) {
         await supabase.auth.signOut();
         setError("Esta cuenta no existe todavía. Debes registrarte primero.");
-        setTimeout(() => navigate("/register", { replace: true }), 1500);
+        setTimeout(() => {
+          setAuthProcessing(false);
+          navigate("/register", { replace: true });
+        }, 1500);
         return;
       }
 
-      // Caso 2: registro con email (magic link de alta) → pedir contraseña.
-      // Sólo si la cuenta es nueva y no tiene contraseña establecida.
-      // Nota: user.identities incluye provider 'email' cuando ya hay password set;
-      // si no hay, forzamos setup. Como fallback seguro: intent === 'signup' && provider === 'email'.
-      if (intent === "signup" && provider === "email") {
+      // 2) Alta por email (magic link): provider=email + recién creado → setup password.
+      //    Detección independiente del intent porque el link puede abrirse en otro
+      //    navegador donde el intent no existe.
+      if (provider === "email" && isBrandNew) {
         setNeedsPasswordSetup(true);
+        setAuthProcessing(false);
         navigate("/setup-password", { replace: true });
         return;
       }
 
-      // Caso 3: signup con Google → lobby directo (la cuenta queda creada y lista).
-      // Caso 4: signin con Google de cuenta existente → lobby.
-      // Caso 5: signin con email+password no pasa por aquí.
+      // 3) Resto: signup Google nuevo, signin Google existente, magic link de usuario
+      //    existente (no debería ocurrir en nuestro flujo), etc. → lobby.
+      setAuthProcessing(false);
       navigate("/lobby", { replace: true });
     };
 
     run();
-  }, [navigate, setNeedsPasswordSetup]);
+  }, [navigate, setNeedsPasswordSetup, setAuthProcessing]);
 
   return (
     <AuthCard>
