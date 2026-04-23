@@ -31,7 +31,9 @@ CapacitorApp.addListener('appUrlOpen', async (event) => {
       await supabase.auth.exchangeCodeForSession(code);
     }
 
-    window.location.href = '/lobby';
+    // Siempre pasamos por /auth/callback para que la lógica de signin vs signup
+    // decida el destino final (rechazar login sin registro, llevar a setup-password, etc.)
+    window.location.href = '/auth/callback';
   } catch (err) {
     console.error('Error procesando deep link', err);
     window.location.href = '/login';

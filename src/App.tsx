@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import AuthCallback from "./pages/AuthCallback";
 import SetupPassword from "./pages/SetupPassword";
 import Lobby from "./pages/Lobby";
@@ -54,7 +55,7 @@ const App = () => (
                 <Route path="/history" element={<History />} />
                 <Route path="/settings" element={<SettingsPage />} />
               </Route>
-              <Route path="/register" element={<Navigate to="/login" replace />} />
+              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
               <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
               <Route path="/reset-password" element={<Navigate to="/login" replace />} />
               <Route path="/verify-email" element={<Navigate to="/login" replace />} />

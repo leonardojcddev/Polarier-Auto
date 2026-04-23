@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle } = useAuth();
+  const { login, signInGoogle } = useAuth();
   const [showPass, setShowPass] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +29,7 @@ const Login = () => {
     } catch (err: any) {
       const msg: string = err.message || "";
       if (msg.toLowerCase().includes("invalid login credentials") || msg.toLowerCase().includes("invalid credentials")) {
-        toast.error("Correo o contraseña incorrectos.");
+        toast.error("Correo o contraseña incorrectos. Si no tienes cuenta, regístrate primero.");
       } else if (msg.toLowerCase().includes("email not confirmed")) {
         toast.error("Debes verificar tu correo electrónico antes de iniciar sesión.");
       } else {
@@ -42,7 +42,7 @@ const Login = () => {
 
   const handleGoogle = async () => {
     try {
-      await loginWithGoogle();
+      await signInGoogle();
     } catch (err: any) {
       toast.error(err.message || "Error con Google");
     }
