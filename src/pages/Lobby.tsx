@@ -158,6 +158,22 @@ const Lobby = () => {
         {/* ── HERO ── */}
         <section className="flex flex-col items-center text-center gap-2">
           <img src={polarierLogo} alt="Polarier" className="h-16" />
+          <p
+            className="text-[11px] sm:text-xs text-foreground/80 mt-1 flex flex-wrap justify-center items-center gap-x-1.5 gap-y-0.5 max-w-md"
+            style={{ fontFamily: "'Poppins', sans-serif", fontStyle: "italic", fontWeight: 300 }}
+          >
+            <span>Excelencia</span>
+            <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
+            <span>Proactividad</span>
+            <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
+            <span>Innovación</span>
+            <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
+            <span>Compromiso</span>
+            <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
+            <span>Orientación al Cliente</span>
+            <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
+            <span>Responsabilidad Ambiental</span>
+          </p>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mt-6">
             ¿Qué quieres hacer hoy?
@@ -193,7 +209,7 @@ const Lobby = () => {
               disabled={!query.trim() || sending}
               className="mr-2 sm:mr-3 w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30"
             >
-              <Send size={18} className="text-primary" />
+              <Send size={20} className="text-secondary-foreground" />
             </button>
           </div>
           <p className="text-center text-xs text-muted-foreground mt-2">

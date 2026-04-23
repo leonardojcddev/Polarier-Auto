@@ -125,7 +125,7 @@ const History = () => {
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); setDeletingId(chat.id); }}
-              className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"
+              className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors lg:opacity-0 lg:group-hover:opacity-100"
               title="Eliminar conversación"
             >
               <Trash2 size={16} />

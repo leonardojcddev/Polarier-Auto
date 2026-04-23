@@ -76,7 +76,7 @@ const ChatInput = ({ value, onChange, onSend, onFileSelect, uploading, disabled,
             disabled={disabled}
             className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            <Send size={16} className="text-primary" />
+            <Send size={16} className="text-secondary-foreground" />
           </button>
         </div>
         <p className="text-center text-xs text-muted-foreground mt-2">

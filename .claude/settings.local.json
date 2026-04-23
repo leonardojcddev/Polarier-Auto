@@ -5,7 +5,12 @@
       "Bash(bun dev *)",
       "Bash(npm run *)",
       "Bash(wait)",
-      "Bash(npx capacitor-assets *)"
+      "Bash(npx capacitor-assets *)",
+      "Bash(node -e \"console.log\\(require\\('sharp/package.json'\\).version\\)\")",
+      "Bash(node -e ' *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Trabajo\\Polarier-Auto\\public\\backgrounds"
     ]
   }
 }

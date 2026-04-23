@@ -27,7 +27,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
 
   return (
     <div className="flex gap-3 max-w-2xl ml-auto flex-row-reverse">
-      <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center text-xs font-bold text-primary overflow-hidden">
+      <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center text-xs font-bold text-secondary-foreground overflow-hidden">
         {avatarUrl ? (
           <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
         ) : (

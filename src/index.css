@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:ital,wght@1,300&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,8 +18,9 @@
     --primary: 231 50% 38%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 39 76% 60%;
-    --secondary-foreground: 228 30% 20%;
+    /* En modo claro los botones de acción son azules (match con --primary) */
+    --secondary: 231 50% 38%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 225 14% 93%;
     --muted-foreground: 228 10% 50%;
@@ -41,8 +42,8 @@
     --sidebar-muted: 231 40% 35%;
     --sidebar-active: 39 76% 60%;
 
-    --chat-bg-mobile: url('/backgrounds/light-mobile.png');
-    --chat-bg-desktop: url('/backgrounds/light-desktop.png');
+    --chat-bg-mobile: url('/backgrounds/light-mobile.webp');
+    --chat-bg-desktop: url('/backgrounds/light-desktop.webp');
   }
 
   .dark {
@@ -79,8 +80,8 @@
     --sidebar-muted: 228 20% 16%;
     --sidebar-active: 39 76% 60%;
 
-    --chat-bg-mobile: url('/backgrounds/dark-mobile.png');
-    --chat-bg-desktop: url('/backgrounds/dark-desktop.png');
+    --chat-bg-mobile: url('/backgrounds/dark-mobile.webp');
+    --chat-bg-desktop: url('/backgrounds/dark-desktop.webp');
   }
 }
 
