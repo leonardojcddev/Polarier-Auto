@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import { uploadAssistantBlob } from '@/services/storage';
 
 export interface Chat {
   id: string;
@@ -149,6 +150,14 @@ const extractTextContent = (data: unknown): string | null => {
         return `[Audio](${val.trim()}){.audio-player|audio/mpeg}`;
       }
     }
+    // Image keys: URL de imagen → marker de imagen
+    const imageKeys = ['image_url', 'imageUrl', 'image', 'picture', 'photo', 'photo_url'];
+    for (const key of imageKeys) {
+      const val = obj[key];
+      if (typeof val === 'string' && val.trim()) {
+        return `[Imagen](${val.trim()}){.image|image/png}`;
+      }
+    }
     // Priority keys for text content
     const keys = ['respuesta', 'response', 'message', 'text', 'content', 'output', 'result', 'answer', 'reply'];
     for (const key of keys) {
@@ -208,11 +217,29 @@ export const sendToN8n = async (
 
     const contentType = res.headers.get('content-type') || '';
     
-    // Audio response → reproductor embebido
+    // Audio response → guardar en Supabase y devolver marker con URL firmada.
     if (contentType.startsWith('audio/')) {
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      return `[Audio](${url}){.audio-player|${contentType}}`;
+      try {
+        const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, contentType);
+        return `[Audio](${signedUrl}){.audio-player|${mime_type}}`;
+      } catch {
+        // Fallback: URL efímera si la subida falla
+        const url = URL.createObjectURL(blob);
+        return `[Audio](${url}){.audio-player|${contentType}}`;
+      }
+    }
+
+    // Imagen → guardar en Supabase y devolver marker de imagen
+    if (contentType.startsWith('image/')) {
+      const blob = await res.blob();
+      try {
+        const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, contentType);
+        return `[Imagen](${signedUrl}){.image|${mime_type}}`;
+      } catch {
+        const url = URL.createObjectURL(blob);
+        return `[Imagen](${url}){.image|${contentType}}`;
+      }
     }
 
     // If response is a file (not JSON/text), return a download link

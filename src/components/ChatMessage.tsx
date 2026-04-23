@@ -1,5 +1,6 @@
+import { useState } from "react";
 import botAvatar from "@/assets/bot-avatar.svg";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
 
 interface ChatMessageProps {
@@ -13,6 +14,7 @@ interface ChatMessageProps {
 type Parsed =
   | { kind: "text"; text: string }
   | { kind: "audio"; url: string; mime: string }
+  | { kind: "image"; url: string; mime: string }
   | { kind: "file"; url: string; ext: string; label: string };
 
 const parseMessage = (raw: string): Parsed => {
@@ -20,11 +22,51 @@ const parseMessage = (raw: string): Parsed => {
   if (audioMatch) {
     return { kind: "audio", url: audioMatch[2], mime: audioMatch[3] };
   }
+  const imageMatch = raw.match(/^\[([^\]]+)\]\(([^)]+)\)\{\.image\|([^}]+)\}$/);
+  if (imageMatch) {
+    return { kind: "image", url: imageMatch[2], mime: imageMatch[3] };
+  }
   const fileMatch = raw.match(/^\[([^\]]+)\]\(([^)]+)\)\{\.file-download\|([^}]+)\}$/);
   if (fileMatch) {
     return { kind: "file", label: fileMatch[1], url: fileMatch[2], ext: fileMatch[3] };
   }
   return { kind: "text", text: raw };
+};
+
+const ImageThumb = ({ url }: { url: string }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="block rounded-lg overflow-hidden max-w-[260px] sm:max-w-xs hover:opacity-90 transition-opacity"
+      >
+        <img src={url} alt="Imagen" className="w-full h-auto object-cover" loading="lazy" />
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+            aria-label="Cerrar"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={url}
+            alt="Imagen ampliada"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  );
 };
 
 const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessageProps) => {
@@ -54,8 +96,9 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     );
   }
 
-  const body =
-    parsed.kind === "file" ? (
+  let body: JSX.Element;
+  if (parsed.kind === "file") {
+    body = (
       <a
         href={parsed.url}
         download
@@ -64,9 +107,14 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
         <Download size={16} />
         {parsed.label} ({parsed.ext.toUpperCase()})
       </a>
-    ) : (
-      <span className="whitespace-pre-wrap">{parsed.text}</span>
     );
+  } else if (parsed.kind === "image") {
+    body = <ImageThumb url={parsed.url} />;
+  } else {
+    body = <span className="whitespace-pre-wrap">{parsed.text}</span>;
+  }
+
+  const bubblePadding = parsed.kind === "image" ? "p-1.5" : "px-4 py-3";
 
   if (sender === "bot") {
     return (
@@ -75,7 +123,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
           <img src={botAvatar} alt="Bot" className="w-5 h-5" />
         </div>
         <div>
-          <div className="bg-muted rounded-xl rounded-tl-sm px-4 py-3 text-sm text-foreground">
+          <div className={`bg-muted rounded-xl rounded-tl-sm text-sm text-foreground ${bubblePadding}`}>
             {body}
           </div>
           <span className="text-xs text-muted-foreground mt-1 block">{time}</span>
@@ -94,7 +142,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
         )}
       </div>
       <div className="text-right">
-        <div className="bg-secondary/20 rounded-xl rounded-tr-sm px-4 py-3 text-sm text-foreground">
+        <div className={`bg-secondary/20 rounded-xl rounded-tr-sm text-sm text-foreground ${bubblePadding}`}>
           {body}
         </div>
         <span className="text-xs text-muted-foreground mt-1 block">{time}</span>

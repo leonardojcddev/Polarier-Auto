@@ -47,17 +47,20 @@ export const uploadAvatar = async (file: File): Promise<string> => {
 
 export const uploadDocument = async (
   file: File,
-  chatId?: string
+  chatId?: string,
+  role: 'user' | 'assistant' = 'user'
 ): Promise<{
   id: string;
   file_name: string;
   file_path: string;
   mime_type: string;
   size_bytes: number;
+  role: 'user' | 'assistant';
 }> => {
   const isAudio = file.type.startsWith('audio/');
-  if (!isAudio && !ALLOWED_DOC_TYPES.includes(file.type)) {
-    throw new Error('Solo se permiten archivos PDF, XLSX, DOC, DOCX o audio');
+  const isImage = file.type.startsWith('image/');
+  if (!isAudio && !isImage && !ALLOWED_DOC_TYPES.includes(file.type)) {
+    throw new Error('Solo se permiten archivos PDF, XLSX, DOC, DOCX, audio o imagen');
   }
   const maxSize = isAudio ? MAX_AUDIO_SIZE : MAX_DOC_SIZE;
   if (file.size > maxSize) {
@@ -69,7 +72,8 @@ export const uploadDocument = async (
 
   const timestamp = Date.now();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const filePath = `${user.id}/${timestamp}-${safeName}`;
+  const prefix = role === 'assistant' ? 'assistant' : user.id;
+  const filePath = `${prefix === 'assistant' ? `${user.id}/assistant` : user.id}/${timestamp}-${safeName}`;
 
   const { error: uploadError } = await supabase.storage
     .from('documents')
@@ -86,6 +90,7 @@ export const uploadDocument = async (
       mime_type: file.type,
       size_bytes: file.size,
       status: 'uploaded',
+      role,
     })
     .select()
     .single();
@@ -94,10 +99,38 @@ export const uploadDocument = async (
   return data;
 };
 
+/**
+ * Sube un blob devuelto por el asistente (p. ej. audio TTS, imagen) a Supabase
+ * vinculado al chat. Devuelve URL firmada lista para el marker.
+ */
+export const uploadAssistantBlob = async (
+  blob: Blob,
+  chatId: string,
+  mimeType: string
+): Promise<{ id: string; file_path: string; signedUrl: string; mime_type: string }> => {
+  const ext = mimeType.includes('mpeg') ? 'mp3'
+    : mimeType.includes('wav') ? 'wav'
+    : mimeType.includes('ogg') ? 'ogg'
+    : mimeType.includes('webm') ? 'webm'
+    : mimeType.includes('aac') ? 'aac'
+    : mimeType.includes('mp4') && mimeType.startsWith('audio/') ? 'm4a'
+    : mimeType.includes('png') ? 'png'
+    : mimeType.includes('jpeg') || mimeType.includes('jpg') ? 'jpg'
+    : mimeType.includes('webp') ? 'webp'
+    : mimeType.includes('gif') ? 'gif'
+    : 'bin';
+  const fileName = `assistant-${Date.now()}.${ext}`;
+  const file = new File([blob], fileName, { type: mimeType });
+  const doc = await uploadDocument(file, chatId, 'assistant');
+  const signedUrl = await getSignedDocumentUrl(doc.file_path, 60 * 60 * 24 * 365);
+  return { id: doc.id, file_path: doc.file_path, signedUrl, mime_type: doc.mime_type };
+};
+
 export const getDocuments = async (): Promise<any[]> => {
   const { data, error } = await supabase
     .from('documents')
     .select('*')
+    .eq('role', 'user')
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
