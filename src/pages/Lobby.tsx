@@ -159,8 +159,8 @@ const Lobby = () => {
         <section className="flex flex-col items-center text-center gap-2">
           <img src={polarierLogo} alt="Polarier" className="h-16" />
           <p
-            className="text-[11px] sm:text-xs text-foreground/80 mt-1 flex flex-wrap justify-center items-center gap-x-1.5 gap-y-0.5 max-w-md"
-            style={{ fontFamily: "'Poppins', sans-serif", fontStyle: "italic", fontWeight: 300 }}
+            className="text-[11px] sm:text-xs mt-1 flex flex-wrap justify-center items-center gap-x-1.5 gap-y-0.5 max-w-md"
+            style={{ fontFamily: "'Poppins', sans-serif", fontStyle: "italic", fontWeight: 300, color: 'hsl(39 76% 60%)' }}
           >
             <span>Excelencia</span>
             <span className="text-base leading-none" style={{ color: 'hsl(39 76% 60%)' }}>·</span>
