@@ -7,7 +7,9 @@
       "Bash(wait)",
       "Bash(npx capacitor-assets *)",
       "Bash(node -e \"console.log\\(require\\('sharp/package.json'\\).version\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\(require\\('capacitor-voice-recorder/package.json'\\).version\\)\")",
+      "Bash(npx cap *)"
     ],
     "additionalDirectories": [
       "C:\\Trabajo\\Polarier-Auto\\public\\backgrounds"

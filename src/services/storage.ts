@@ -7,8 +7,16 @@ const ALLOWED_DOC_TYPES = [
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
+const ALLOWED_AUDIO_TYPES = [
+  'audio/webm',
+  'audio/ogg',
+  'audio/mpeg',
+  'audio/mp4',
+  'audio/wav',
+];
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_DOC_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_AUDIO_SIZE = 15 * 1024 * 1024; // 15MB
 
 export const uploadAvatar = async (file: File): Promise<string> => {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -54,11 +62,16 @@ export const uploadDocument = async (
   mime_type: string;
   size_bytes: number;
 }> => {
-  if (!ALLOWED_DOC_TYPES.includes(file.type)) {
-    throw new Error('Solo se permiten archivos PDF, XLSX, DOC y DOCX');
+  const isAudio = file.type.startsWith('audio/');
+  if (!isAudio && !ALLOWED_DOC_TYPES.includes(file.type)) {
+    throw new Error('Solo se permiten archivos PDF, XLSX, DOC, DOCX o audio');
   }
-  if (file.size > MAX_DOC_SIZE) {
-    throw new Error('El archivo no puede superar 20MB');
+  if (isAudio && !ALLOWED_AUDIO_TYPES.some((t) => file.type.startsWith(t))) {
+    throw new Error('Formato de audio no soportado');
+  }
+  const maxSize = isAudio ? MAX_AUDIO_SIZE : MAX_DOC_SIZE;
+  if (file.size > maxSize) {
+    throw new Error(isAudio ? 'El audio no puede superar 15MB' : 'El archivo no puede superar 20MB');
   }
 
   const { data: { user } } = await supabase.auth.getUser();

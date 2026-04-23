@@ -185,6 +185,9 @@ const Chat = () => {
   };
 
   const handleFileUpload = async (file: File) => {
+    const isAudio = file.type.startsWith("audio/");
+    const label = isAudio ? "🎤 Audio" : `📎 Documento subido: ${file.name}`;
+
     setPendingFile({ file, status: "uploading", progress: 30 });
 
     try {
@@ -200,7 +203,8 @@ const Chat = () => {
       const doc = await uploadDocument(file, activeChatId);
       setPendingFile((prev) => prev ? { ...prev, progress: 90 } : null);
 
-      const msg = await sendMessage(activeChatId, `📎 Documento subido: ${doc.file_name}`, "user");
+      const userMessage = isAudio ? label : `📎 Documento subido: ${doc.file_name}`;
+      const msg = await sendMessage(activeChatId, userMessage, "user");
       setMessages((prev) => [...prev, msg]);
       scrollToBottom();
 
@@ -208,7 +212,7 @@ const Chat = () => {
       setTimeout(() => setPendingFile(null), 2000);
 
       setIsTyping(true);
-      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', `📎 Documento subido: ${doc.file_name}`, 'user', {
+      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', userMessage, 'user', {
         file_name: doc.file_name,
         file_path: doc.file_path,
         mime_type: doc.mime_type,
@@ -220,11 +224,11 @@ const Chat = () => {
         setMessages((prev) => [...prev, botMsg]);
         scrollToBottom();
       }
-      toast.success("Documento subido correctamente");
+      if (!isAudio) toast.success("Documento subido correctamente");
     } catch (err: any) {
       setIsTyping(false);
       setPendingFile((prev) => prev ? { ...prev, status: "error", error: err.message } : null);
-      toast.error(err.message || "Error subiendo documento");
+      toast.error(err.message || (isAudio ? "Error enviando audio" : "Error subiendo documento"));
     }
   };
 
@@ -320,6 +324,7 @@ const Chat = () => {
           if (pendingFile) handleFileUpload(pendingFile.file);
         }}
         onFileSelect={handleFileUpload}
+        onAudioSend={handleFileUpload}
       />
     </div>
   );
