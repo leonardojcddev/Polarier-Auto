@@ -173,12 +173,16 @@ export const sendToN8n = async (
   userId: string,
   message: string,
   role: string,
-  fileInfo?: { file_name: string; file_path: string; mime_type: string; size_bytes: number }
+  fileInfo?: { file_name: string; file_path: string; mime_type: string; size_bytes: number },
+  userName?: string,
+  userEmail?: string
 ): Promise<string | null> => {
   try {
     const payload: Record<string, unknown> = {
       chat_id: chatId,
       user_id: userId,
+      user_name: userName ?? null,
+      user_email: userEmail ?? null,
       message,
       role,
       timestamp: new Date().toISOString(),

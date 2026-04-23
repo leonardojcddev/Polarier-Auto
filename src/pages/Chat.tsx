@@ -25,6 +25,15 @@ const Chat = () => {
   const [currentChatId, setCurrentChatId] = useState<string | null>(chatId ?? null);
   const [chatTitle, setChatTitle] = useState("Nueva conversación");
   const [isTyping, setIsTyping] = useState(false);
+
+  const userName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "";
+  const userEmail = user?.email || "";
+
   const redirected = useRef(false);
   const initialActionHandled = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -82,7 +91,7 @@ const Chat = () => {
             updateChatTitle(currentChatId, title).then(() => {
               window.dispatchEvent(new CustomEvent('chat-title-updated'));
             }).catch(() => {});
-            const n8nResponse = await sendToN8n(currentChatId, user?.id || '', messageText, 'user');
+            const n8nResponse = await sendToN8n(currentChatId, user?.id || '', messageText, 'user', undefined, userName, userEmail);
             setIsTyping(false);
             if (n8nResponse) {
               const botMsg = await sendMessage(currentChatId, n8nResponse, "assistant");
@@ -160,7 +169,7 @@ const Chat = () => {
       }
 
       // Send to n8n
-      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', messageText, 'user');
+      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', messageText, 'user', undefined, userName, userEmail);
       setIsTyping(false);
       if (n8nResponse) {
         const botMsg = await sendMessage(activeChatId, n8nResponse, "assistant");
@@ -204,7 +213,7 @@ const Chat = () => {
         file_path: doc.file_path,
         mime_type: doc.mime_type,
         size_bytes: doc.size_bytes,
-      });
+      }, userName, userEmail);
       setIsTyping(false);
       if (n8nResponse) {
         const botMsg = await sendMessage(activeChatId, n8nResponse, "assistant");
