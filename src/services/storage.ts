@@ -103,6 +103,17 @@ export const getDocuments = async (): Promise<any[]> => {
   return data ?? [];
 };
 
+/**
+ * URL firmada de un archivo del bucket 'documents' (privado). Vale 1 hora por defecto.
+ */
+export const getSignedDocumentUrl = async (filePath: string, expiresInSec = 3600): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .createSignedUrl(filePath, expiresInSec);
+  if (error || !data) throw new Error('No se pudo generar URL del archivo');
+  return data.signedUrl;
+};
+
 export const downloadDocument = async (filePath: string, fileName: string): Promise<void> => {
   const { data, error } = await supabase.storage
     .from('documents')

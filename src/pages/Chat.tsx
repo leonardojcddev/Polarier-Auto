@@ -5,7 +5,7 @@ import ChatMessage from "@/components/ChatMessage";
 import ChatInput from "@/components/ChatInput";
 import { PendingFile } from "@/components/FilePreviewCard";
 import { createChat, getMessages, getLatestChat, getChatById, sendMessage, sendToN8n, updateChatTitle, ChatMessage as ChatMsg } from "@/services/chat";
-import { uploadDocument } from "@/services/storage";
+import { uploadDocument, getSignedDocumentUrl } from "@/services/storage";
 import botAvatar from "@/assets/bot-avatar.svg";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -186,7 +186,6 @@ const Chat = () => {
 
   const handleFileUpload = async (file: File) => {
     const isAudio = file.type.startsWith("audio/");
-    const label = isAudio ? "🎤 Audio" : `📎 Documento subido: ${file.name}`;
 
     setPendingFile({ file, status: "uploading", progress: 30 });
 
@@ -203,7 +202,14 @@ const Chat = () => {
       const doc = await uploadDocument(file, activeChatId);
       setPendingFile((prev) => prev ? { ...prev, progress: 90 } : null);
 
-      const userMessage = isAudio ? label : `📎 Documento subido: ${doc.file_name}`;
+      let userMessage: string;
+      if (isAudio) {
+        // URL firmada para que el reproductor pueda leer el audio del bucket privado
+        const signed = await getSignedDocumentUrl(doc.file_path, 60 * 60 * 24 * 365);
+        userMessage = `[Audio](${signed}){.audio-player|${doc.mime_type}}`;
+      } else {
+        userMessage = `📎 Documento subido: ${doc.file_name}`;
+      }
       const msg = await sendMessage(activeChatId, userMessage, "user");
       setMessages((prev) => [...prev, msg]);
       scrollToBottom();
@@ -212,7 +218,8 @@ const Chat = () => {
       setTimeout(() => setPendingFile(null), 2000);
 
       setIsTyping(true);
-      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', userMessage, 'user', {
+      const n8nMessage = isAudio ? "🎤 Audio" : userMessage;
+      const n8nResponse = await sendToN8n(activeChatId, user?.id || '', n8nMessage, 'user', {
         id: doc.id,
         file_name: doc.file_name,
         file_path: doc.file_path,

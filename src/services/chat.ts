@@ -141,6 +141,14 @@ const extractTextContent = (data: unknown): string | null => {
   }
   if (typeof data === 'object') {
     const obj = data as Record<string, unknown>;
+    // Audio keys: si n8n devuelve una URL de audio, la convertimos al marker del reproductor
+    const audioKeys = ['audio_url', 'audioUrl', 'audio', 'voice_url', 'voiceUrl'];
+    for (const key of audioKeys) {
+      const val = obj[key];
+      if (typeof val === 'string' && val.trim()) {
+        return `[Audio](${val.trim()}){.audio-player|audio/mpeg}`;
+      }
+    }
     // Priority keys for text content
     const keys = ['respuesta', 'response', 'message', 'text', 'content', 'output', 'result', 'answer', 'reply'];
     for (const key of keys) {
@@ -200,13 +208,20 @@ export const sendToN8n = async (
 
     const contentType = res.headers.get('content-type') || '';
     
+    // Audio response → reproductor embebido
+    if (contentType.startsWith('audio/')) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      return `[Audio](${url}){.audio-player|${contentType}}`;
+    }
+
     // If response is a file (not JSON/text), return a download link
-    if (contentType.includes('application/pdf') || 
-        contentType.includes('application/vnd') || 
+    if (contentType.includes('application/pdf') ||
+        contentType.includes('application/vnd') ||
         contentType.includes('application/octet-stream')) {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const ext = contentType.includes('pdf') ? 'pdf' : 
+      const ext = contentType.includes('pdf') ? 'pdf' :
                   contentType.includes('spreadsheet') || contentType.includes('xlsx') ? 'xlsx' :
                   contentType.includes('word') || contentType.includes('docx') ? 'docx' : 'file';
       return `[Archivo recibido](${url}){.file-download|${ext}}`;
