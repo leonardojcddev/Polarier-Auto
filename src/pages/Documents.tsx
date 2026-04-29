@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FileText, FileSpreadsheet, File, Download, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
-import { getDocuments, downloadDocument } from "@/services/storage";
+import { getDocuments, downloadDocument, getSignedDocumentUrl } from "@/services/storage";
 import { toast } from "sonner";
 
 const Documents = () => {
@@ -21,7 +21,13 @@ const Documents = () => {
   const handleDownload = async (doc: any) => {
     setDownloadingId(doc.id);
     try {
-      await downloadDocument(doc.file_path, doc.file_name);
+      const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+      if (isNative) {
+        const url = await getSignedDocumentUrl(doc.file_path);
+        window.open(url, "_blank");
+      } else {
+        await downloadDocument(doc.file_path, doc.file_name);
+      }
     } catch (err) {
       console.error('Download error:', err);
       toast.error("Error al descargar el documento");

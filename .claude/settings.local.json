@@ -17,7 +17,17 @@
       "Bash(python3 -m json.tool)",
       "Bash(magick --version)",
       "Bash(convert --version)",
-      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp ok'\\)\")"
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp ok'\\)\")",
+      "Bash(bun add *)",
+      "PowerShell(cd \"c:\\\\Trabajo\\\\Polarier-Auto\"; & \"$env:USERPROFILE\\\\.bun\\\\bin\\\\bun.exe\" add @capacitor/filesystem @capacitor/share 2>&1)",
+      "PowerShell(npm config get prefix)",
+      "Bash(git checkout *)",
+      "Bash(npm show *)",
+      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); console.log\\(v.filter\\(x=>x.startsWith\\('8'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "PowerShell(npm show @capacitor/filesystem@8.1.2 peerDependencies 2>&1)",
+      "PowerShell(npm show @capacitor/share@latest version 2>&1)",
+      "PowerShell(npm show @capacitor/filesystem@8.0.0 dependencies 2>&1)",
+      "PowerShell(npm show @capacitor/synapse versions --json)"
     ],
     "additionalDirectories": [
       "C:\\Trabajo\\Polarier-Auto\\public\\backgrounds"

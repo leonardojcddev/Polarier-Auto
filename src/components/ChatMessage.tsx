@@ -113,6 +113,11 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     const fileName = parsed.label;
     const fileUrl = parsed.url;
     const handleDownload = useCallback(async () => {
+      const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+      if (isNative) {
+        window.open(fileUrl, "_blank");
+        return;
+      }
       try {
         const res = await fetch(fileUrl);
         const blob = await res.blob();
