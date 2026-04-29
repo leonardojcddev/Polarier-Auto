@@ -254,7 +254,7 @@ export const sendToN8n = async (
       const nameMatch = disposition.match(/filename[^;=\n]*=["']?([^"';\n]+)["']?/i);
       const fileName = nameMatch?.[1]?.trim() || `archivo.${ext}`;
       try {
-        const { signedUrl } = await uploadAssistantBlob(blob, chatId, contentType);
+        const { signedUrl } = await uploadAssistantBlob(blob, chatId, contentType, fileName);
         return `[${fileName}](${signedUrl}){.file-download|${ext}}`;
       } catch {
         const url = URL.createObjectURL(blob);
@@ -287,14 +287,14 @@ async function resolveUrlResponse(text: string | null, chatId: string): Promise<
     const urlFileName = text.trim().split('/').pop()?.split('?')[0] || 'archivo';
     const fileName = nameMatch?.[1]?.trim() || urlFileName;
     if (fileCt.startsWith('audio/')) {
-      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt);
+      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt, fileName);
       return `[Audio](${signedUrl}){.audio-player|${mime_type}}`;
     }
     if (fileCt.startsWith('image/')) {
-      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt);
+      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt, fileName);
       return `[Imagen](${signedUrl}){.image|${mime_type}}`;
     }
-    const { signedUrl } = await uploadAssistantBlob(blob, chatId, fileCt);
+    const { signedUrl } = await uploadAssistantBlob(blob, chatId, fileCt, fileName);
     const ext = fileName.includes('.') ? fileName.split('.').pop()! :
       fileCt.includes('pdf') ? 'pdf' :
       fileCt.includes('xlsx') || fileCt.includes('spreadsheet') ? 'xlsx' :

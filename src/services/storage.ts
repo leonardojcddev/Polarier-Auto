@@ -106,8 +106,9 @@ export const uploadDocument = async (
 export const uploadAssistantBlob = async (
   blob: Blob,
   chatId: string,
-  mimeType: string
-): Promise<{ id: string; file_path: string; signedUrl: string; mime_type: string }> => {
+  mimeType: string,
+  originalName?: string
+): Promise<{ id: string; file_path: string; signedUrl: string; mime_type: string; fileName: string }> => {
   const ext = mimeType.includes('mpeg') ? 'mp3'
     : mimeType.includes('wav') ? 'wav'
     : mimeType.includes('ogg') ? 'ogg'
@@ -118,12 +119,15 @@ export const uploadAssistantBlob = async (
     : mimeType.includes('jpeg') || mimeType.includes('jpg') ? 'jpg'
     : mimeType.includes('webp') ? 'webp'
     : mimeType.includes('gif') ? 'gif'
+    : mimeType.includes('pdf') ? 'pdf'
+    : mimeType.includes('spreadsheet') || mimeType.includes('xlsx') ? 'xlsx'
+    : mimeType.includes('word') || mimeType.includes('docx') ? 'docx'
     : 'bin';
-  const fileName = `assistant-${Date.now()}.${ext}`;
+  const fileName = originalName || `assistant-${Date.now()}.${ext}`;
   const file = new File([blob], fileName, { type: mimeType });
   const doc = await uploadDocument(file, chatId, 'assistant');
   const signedUrl = await getSignedDocumentUrl(doc.file_path, 60 * 60 * 24 * 365);
-  return { id: doc.id, file_path: doc.file_path, signedUrl, mime_type: doc.mime_type };
+  return { id: doc.id, file_path: doc.file_path, signedUrl, mime_type: doc.mime_type, fileName };
 };
 
 export const getDocuments = async (): Promise<any[]> => {
