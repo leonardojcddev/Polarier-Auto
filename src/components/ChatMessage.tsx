@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import botAvatar from "@/assets/bot-avatar.svg";
 import { Download, X, FileText, FileSpreadsheet, FileArchive, File } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
@@ -110,11 +110,29 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
       ext === "xlsx" || ext === "xls" ? "text-green-400" :
       ext === "docx" || ext === "doc" ? "text-blue-400" :
       "text-muted-foreground";
+    const fileName = parsed.label;
+    const fileUrl = parsed.url;
+    const handleDownload = useCallback(async () => {
+      try {
+        const res = await fetch(fileUrl);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch {
+        window.open(fileUrl, "_blank");
+      }
+    }, [fileUrl, fileName]);
     body = (
-      <a
-        href={parsed.url}
-        download={parsed.label}
-        className="flex items-center gap-3 min-w-[220px] max-w-[280px] group"
+      <button
+        type="button"
+        onClick={handleDownload}
+        className="flex items-center gap-3 min-w-[220px] max-w-[280px] group text-left"
       >
         {/* Icono del tipo de archivo */}
         <div className="w-12 h-12 rounded-xl bg-background/40 border border-border/60 flex items-center justify-center shrink-0">
@@ -129,7 +147,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
         <div className="w-8 h-8 rounded-full bg-secondary/60 group-hover:bg-secondary flex items-center justify-center shrink-0 transition-colors">
           <Download size={15} className="text-secondary-foreground" />
         </div>
-      </a>
+      </button>
     );
   } else if (parsed.kind === "image") {
     body = <ImageThumb url={parsed.url} />;
