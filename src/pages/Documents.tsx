@@ -24,7 +24,7 @@ const Documents = () => {
       const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
       if (isNative) {
         const url = await getSignedDocumentUrl(doc.file_path);
-        window.open(url, "_blank");
+        window.location.href = url;
       } else {
         await downloadDocument(doc.file_path, doc.file_name);
       }

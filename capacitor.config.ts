@@ -11,7 +11,15 @@ const config: CapacitorConfig = {
   plugins: {
     App: {
       urlScheme: 'polarier'
+    },
+    CapacitorHttp: {
+      enabled: true
     }
+  },
+  android: {
+    allowNavigation: [
+      '*.supabase.co'
+    ]
   }
 };
 

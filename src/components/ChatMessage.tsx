@@ -115,7 +115,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     const handleDownload = useCallback(async () => {
       const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
       if (isNative) {
-        window.open(fileUrl, "_blank");
+        window.location.href = fileUrl;
         return;
       }
       try {
