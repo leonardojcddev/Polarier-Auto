@@ -1,6 +1,6 @@
 import { useState } from "react";
 import botAvatar from "@/assets/bot-avatar.svg";
-import { Download, X } from "lucide-react";
+import { Download, X, FileText, FileSpreadsheet, FileArchive, File } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
 
 interface ChatMessageProps {
@@ -98,14 +98,37 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
 
   let body: JSX.Element;
   if (parsed.kind === "file") {
+    const ext = parsed.ext.toLowerCase();
+    const FileIcon =
+      ext === "pdf" ? FileText :
+      ext === "xlsx" || ext === "xls" ? FileSpreadsheet :
+      ext === "docx" || ext === "doc" ? FileText :
+      ext === "zip" || ext === "rar" ? FileArchive :
+      File;
+    const iconColor =
+      ext === "pdf" ? "text-red-400" :
+      ext === "xlsx" || ext === "xls" ? "text-green-400" :
+      ext === "docx" || ext === "doc" ? "text-blue-400" :
+      "text-muted-foreground";
     body = (
       <a
         href={parsed.url}
-        download
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50 border border-border text-sm font-medium hover:bg-background transition-colors"
+        download={parsed.label}
+        className="flex items-center gap-3 min-w-[220px] max-w-[280px] group"
       >
-        <Download size={16} />
-        {parsed.label} ({parsed.ext.toUpperCase()})
+        {/* Icono del tipo de archivo */}
+        <div className="w-12 h-12 rounded-xl bg-background/40 border border-border/60 flex items-center justify-center shrink-0">
+          <FileIcon size={26} className={iconColor} />
+        </div>
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate leading-tight">{parsed.label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 uppercase">{parsed.ext}</p>
+        </div>
+        {/* Botón descarga */}
+        <div className="w-8 h-8 rounded-full bg-secondary/60 group-hover:bg-secondary flex items-center justify-center shrink-0 transition-colors">
+          <Download size={15} className="text-secondary-foreground" />
+        </div>
       </a>
     );
   } else if (parsed.kind === "image") {
@@ -114,7 +137,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     body = <span className="whitespace-pre-wrap">{parsed.text}</span>;
   }
 
-  const bubblePadding = parsed.kind === "image" ? "p-1.5" : "px-4 py-3";
+  const bubblePadding = parsed.kind === "image" ? "p-1.5" : parsed.kind === "file" ? "p-3" : "px-4 py-3";
 
   if (sender === "bot") {
     return (
