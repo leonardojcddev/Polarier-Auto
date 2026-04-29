@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Download, X, FileText, FileSpreadsheet, FileArchive, File } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
 import BotAvatar from "@/components/BotAvatar";
+import { getSignedDownloadUrl } from "@/services/storage";
 
 interface ChatMessageProps {
   sender: "bot" | "user";
@@ -115,7 +116,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     const handleDownload = useCallback(async () => {
       const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
       if (isNative) {
-        window.location.href = fileUrl;
+        await (window as any).Capacitor.Plugins.Downloader.download({ url: fileUrl, fileName });
         return;
       }
       try {

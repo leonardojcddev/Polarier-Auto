@@ -5,20 +5,13 @@ const config: CapacitorConfig = {
   appName: 'Polarier Auto',
   webDir: 'dist',
   server: {
-    cleartext: false
+    url: 'https://polarier-auto-production.up.railway.app',
+    cleartext: true
   },
   plugins: {
     App: {
       urlScheme: 'polarier'
-    },
-    CapacitorHttp: {
-      enabled: true
     }
-  },
-  android: {
-    allowNavigation: [
-      '*.supabase.co'
-    ]
   }
 };
 

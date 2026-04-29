@@ -14,19 +14,15 @@
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true">
-            <!-- Launcher normal -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- 🔥 DEEP LINK -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="polarier" />
             </intent-filter>
         </activity>
@@ -40,9 +36,9 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
 </manifest>

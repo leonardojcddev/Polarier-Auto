@@ -154,6 +154,14 @@ export const getSignedDocumentUrl = async (filePath: string, expiresInSec = 3600
   return data.signedUrl;
 };
 
+export const getSignedDownloadUrl = async (filePath: string, fileName: string): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .createSignedUrl(filePath, 300, { download: fileName });
+  if (error || !data) throw new Error('No se pudo generar URL de descarga');
+  return data.signedUrl;
+};
+
 export const downloadDocument = async (filePath: string, fileName: string): Promise<void> => {
   const { data, error } = await supabase.storage
     .from('documents')

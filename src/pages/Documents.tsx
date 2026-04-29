@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FileText, FileSpreadsheet, File, Download, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
-import { getDocuments, downloadDocument, getSignedDocumentUrl } from "@/services/storage";
+import { getDocuments, downloadDocument, getSignedDownloadUrl } from "@/services/storage";
 import { toast } from "sonner";
 
 const Documents = () => {
@@ -23,8 +23,8 @@ const Documents = () => {
     try {
       const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
       if (isNative) {
-        const url = await getSignedDocumentUrl(doc.file_path);
-        window.location.href = url;
+        const url = await getSignedDownloadUrl(doc.file_path, doc.file_name);
+        await (window as any).Capacitor.Plugins.Downloader.download({ url, fileName: doc.file_name });
       } else {
         await downloadDocument(doc.file_path, doc.file_name);
       }
