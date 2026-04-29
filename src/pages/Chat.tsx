@@ -6,7 +6,7 @@ import ChatInput from "@/components/ChatInput";
 import { PendingFile } from "@/components/FilePreviewCard";
 import { createChat, getMessages, getLatestChat, getChatById, sendMessage, sendToN8n, updateChatTitle, ChatMessage as ChatMsg } from "@/services/chat";
 import { uploadDocument, getSignedDocumentUrl } from "@/services/storage";
-import botAvatar from "@/assets/bot-avatar.svg";
+import BotAvatar from "@/components/BotAvatar";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import type { LayoutContext } from "@/components/AppLayout";
@@ -308,7 +308,7 @@ const Chat = () => {
         {isTyping && (
           <div className="flex gap-3 max-w-2xl">
             <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center overflow-hidden">
-              <img src={botAvatar} alt="Bot" className="w-5 h-5" />
+              <BotAvatar className="w-5 h-5" />
             </div>
             <div className="bg-muted rounded-xl rounded-tl-sm px-4 py-3 text-sm text-muted-foreground flex items-center gap-1">
               <span className="inline-block w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />

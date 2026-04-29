@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import botAvatar from "@/assets/bot-avatar.svg";
 import { Download, X, FileText, FileSpreadsheet, FileArchive, File } from "lucide-react";
 import AudioPlayer from "@/components/AudioPlayer";
+import BotAvatar from "@/components/BotAvatar";
 
 interface ChatMessageProps {
   sender: "bot" | "user";
@@ -87,7 +87,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
               sender={sender}
               initial={initial}
               avatarUrl={avatarUrl}
-              botAvatarSrc={sender === "bot" ? botAvatar : undefined}
+              botAvatarSrc={sender === "bot" ? "bot" : undefined}
             />
           </div>
           <span className="text-xs text-muted-foreground mt-1 block">{time}</span>
@@ -161,7 +161,7 @@ const ChatMessage = ({ sender, text, time, initial = "U", avatarUrl }: ChatMessa
     return (
       <div className="flex gap-3 max-w-2xl">
         <div className="w-8 h-8 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center overflow-hidden">
-          <img src={botAvatar} alt="Bot" className="w-5 h-5" />
+          <BotAvatar className="w-5 h-5" />
         </div>
         <div>
           <div className={`bg-muted rounded-xl rounded-tl-sm text-sm text-foreground ${bubblePadding}`}>

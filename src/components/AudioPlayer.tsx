@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause } from "lucide-react";
+import BotAvatar from "@/components/BotAvatar";
 
 interface AudioPlayerProps {
   src: string;
@@ -83,7 +84,7 @@ const AudioPlayer = ({ src, avatarUrl, initial = "U", sender, botAvatarSrc }: Au
       {/* Avatar */}
       <div className="w-10 h-10 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center text-xs font-bold text-secondary-foreground overflow-hidden">
         {sender === "bot" && botAvatarSrc ? (
-          <img src={botAvatarSrc} alt="Bot" className="w-6 h-6" />
+          <BotAvatar className="w-6 h-6" />
         ) : avatarUrl ? (
           <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
