@@ -131,10 +131,13 @@ export const uploadAssistantBlob = async (
 };
 
 export const getDocuments = async (): Promise<any[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
   const { data, error } = await supabase
     .from('documents')
     .select('*')
-    .eq('role', 'user')
+    .eq('role', 'assistant')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data ?? [];

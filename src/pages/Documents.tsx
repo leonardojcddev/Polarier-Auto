@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { FileText, Download, Loader2 } from "lucide-react";
+import { FileText, FileSpreadsheet, File, Download, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
-import { getDocuments, downloadDocument, cleanupOldDocuments } from "@/services/storage";
+import { getDocuments, downloadDocument } from "@/services/storage";
 import { toast } from "sonner";
 
 const Documents = () => {
@@ -12,15 +12,10 @@ const Documents = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Cleanup old documents then load
-    cleanupOldDocuments()
+    getDocuments()
+      .then(setDocuments)
       .catch(() => {})
-      .finally(() => {
-        getDocuments()
-          .then(setDocuments)
-          .catch(() => {})
-          .finally(() => setLoading(false));
-      });
+      .finally(() => setLoading(false));
   }, []);
 
   const handleDownload = async (doc: any) => {
@@ -47,8 +42,8 @@ const Documents = () => {
     return (
       <EmptyState
         icon={FileText}
-        title="Aún no tienes documentos"
-        subtitle="Sube tu primer archivo desde el chat."
+        title="El agente no te ha enviado documentos aún"
+        subtitle="Los archivos que te envíe el agente aparecerán aquí."
         buttonLabel="Ir al chat"
         onButtonClick={() => navigate("/chat")}
       />
@@ -61,6 +56,14 @@ const Documents = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const getFileIcon = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    if (ext === 'pdf') return <FileText size={20} className="text-red-400 shrink-0" />;
+    if (['xlsx', 'xls'].includes(ext)) return <FileSpreadsheet size={20} className="text-green-400 shrink-0" />;
+    if (['docx', 'doc'].includes(ext)) return <FileText size={20} className="text-blue-400 shrink-0" />;
+    return <File size={20} className="text-muted-foreground shrink-0" />;
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <h1 className="text-xl font-semibold text-foreground mb-6">Mis Documentos</h1>
@@ -71,7 +74,7 @@ const Documents = () => {
             className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-3"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <FileText size={20} className="text-muted-foreground shrink-0" />
+              {getFileIcon(doc.file_name)}
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{doc.file_name}</p>
                 <p className="text-xs text-muted-foreground">
