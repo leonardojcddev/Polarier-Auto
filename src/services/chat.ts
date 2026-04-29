@@ -242,26 +242,65 @@ export const sendToN8n = async (
       }
     }
 
-    // If response is a file (not JSON/text), return a download link
+    // If response is a file (not JSON/text), save to Supabase and return a download link
     if (contentType.includes('application/pdf') ||
         contentType.includes('application/vnd') ||
         contentType.includes('application/octet-stream')) {
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
       const ext = contentType.includes('pdf') ? 'pdf' :
                   contentType.includes('spreadsheet') || contentType.includes('xlsx') ? 'xlsx' :
                   contentType.includes('word') || contentType.includes('docx') ? 'docx' : 'file';
-      return `[Archivo recibido](${url}){.file-download|${ext}}`;
+      const disposition = res.headers.get('content-disposition') || '';
+      const nameMatch = disposition.match(/filename[^;=\n]*=["']?([^"';\n]+)["']?/i);
+      const fileName = nameMatch?.[1]?.trim() || `archivo.${ext}`;
+      try {
+        const { signedUrl } = await uploadAssistantBlob(blob, chatId, contentType);
+        return `[${fileName}](${signedUrl}){.file-download|${ext}}`;
+      } catch {
+        const url = URL.createObjectURL(blob);
+        return `[${fileName}](${url}){.file-download|${ext}}`;
+      }
     }
 
     if (contentType.includes('application/json')) {
       const json = await res.json();
-      // Extract meaningful text content from any JSON structure
-      return extractTextContent(json);
+      const extracted = extractTextContent(json);
+      return resolveUrlResponse(extracted, chatId);
     }
-    const text = await res.text();
-    return text.trim() || null;
+    const rawText = await res.text();
+    const trimmed = rawText.trim() || null;
+    return resolveUrlResponse(trimmed, chatId);
   } catch {
     return null;
   }
 };
+
+async function resolveUrlResponse(text: string | null, chatId: string): Promise<string | null> {
+  if (!text || !/^https?:\/\/\S+$/.test(text.trim())) return text;
+  try {
+    const fileRes = await fetch(text.trim());
+    if (!fileRes.ok) return text;
+    const fileCt = fileRes.headers.get('content-type') || 'application/octet-stream';
+    const blob = await fileRes.blob();
+    const disposition = fileRes.headers.get('content-disposition') || '';
+    const nameMatch = disposition.match(/filename[^;=\n]*=["']?([^"';\n]+)["']?/i);
+    const urlFileName = text.trim().split('/').pop()?.split('?')[0] || 'archivo';
+    const fileName = nameMatch?.[1]?.trim() || urlFileName;
+    if (fileCt.startsWith('audio/')) {
+      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt);
+      return `[Audio](${signedUrl}){.audio-player|${mime_type}}`;
+    }
+    if (fileCt.startsWith('image/')) {
+      const { signedUrl, mime_type } = await uploadAssistantBlob(blob, chatId, fileCt);
+      return `[Imagen](${signedUrl}){.image|${mime_type}}`;
+    }
+    const { signedUrl } = await uploadAssistantBlob(blob, chatId, fileCt);
+    const ext = fileName.includes('.') ? fileName.split('.').pop()! :
+      fileCt.includes('pdf') ? 'pdf' :
+      fileCt.includes('xlsx') || fileCt.includes('spreadsheet') ? 'xlsx' :
+      fileCt.includes('docx') || fileCt.includes('word') ? 'docx' : 'file';
+    return `[${fileName}](${signedUrl}){.file-download|${ext}}`;
+  } catch {
+    return text;
+  }
+}

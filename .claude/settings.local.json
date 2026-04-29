@@ -9,7 +9,10 @@
       "Bash(node -e \"console.log\\(require\\('sharp/package.json'\\).version\\)\")",
       "Bash(node -e ' *)",
       "Bash(node -e \"console.log\\(require\\('capacitor-voice-recorder/package.json'\\).version\\)\")",
-      "Bash(npx cap *)"
+      "Bash(npx cap *)",
+      "Bash(~/.bun/bin/bun run *)",
+      "PowerShell($env:PATH = \"$env:USERPROFILE\\\\.bun\\\\bin;$env:PATH\"; Set-Location \"c:\\\\Trabajo\\\\Polarier-Auto\"; bun run build 2>&1 | Select-Object -Last 30)",
+      "PowerShell(Get-Command bun -ErrorAction SilentlyContinue)"
     ],
     "additionalDirectories": [
       "C:\\Trabajo\\Polarier-Auto\\public\\backgrounds"
